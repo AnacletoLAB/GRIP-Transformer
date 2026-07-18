@@ -4,18 +4,13 @@ A full transformer with multiple encoder decoder modules able to generatively pr
 
 ---
 
-**Overview**
-This tutorial shows how to train a transformer encoder–decoder from scratch on pairs of nucleotide sequences (interacting RNA couples). We use 8 tokens: `A`, `U`, `C`, `G`, `PAD`, `EOS`, `UNK`, `BOS`. The model’s number of heads, layers and hidden size are configurable. We add standard sinusoidal positional encoding. We train and validate via the Hugging Face `Trainer` API.
-
----
-
 ## 1. Setup
 
-# Create conda environment
+### Create conda environment
 conda create -n rna_full_transformer python=3.9 -y
 conda activate rna_full_transformer
 
-# Install dependencies
+### Install dependencies
 pip install -r requirements.txt
 
 ## 2. Data Preparation
@@ -28,6 +23,9 @@ GCGUA...	CGCAU...
 ```
 
 Each sequence is a contiguous string of `A,U,C,G`; the `STOP` token is appended implicitly during tokenization.
+
+## 3. Tutorial (TO DO)
+This tutorial shows how to train a transformer encoder–decoder from scratch on pairs of nucleotide sequences (interacting RNA couples). We use 8 tokens: `A`, `U`, `C`, `G`, `PAD`, `EOS`, `UNK`, `BOS`. The model’s number of heads, layers and hidden size are configurable. We add standard sinusoidal positional encoding. We train and validate via the Hugging Face `Trainer` API.
 
 ```
 rna_transformer/
