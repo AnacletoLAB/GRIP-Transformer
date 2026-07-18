@@ -1,4 +1,4 @@
-## GRIP: Generative non coding RNA Interation Predictor##
+## GRIP: Generative non coding RNA Interation Predictor ##
 
 A full transformer with multiple encoder decoder modules able to generatively predict a target non-coding RNA (ncRNA) interactor having as input only the sequence of a source ncRNA interactor. It has been trained from scratch using the ncRNA-ncRNA interactions avaialble form the RNA-KG repository.
 
