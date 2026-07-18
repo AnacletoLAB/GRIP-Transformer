@@ -1,6 +1,8 @@
-## GRIP: Generative non coding RNA Interation Predictor ##
+# GRIP: Generative non coding RNA Interation Predictor
 
-A full transformer with multiple encoder decoder modules able to generatively predict a target non-coding RNA (ncRNA) interactor having as input only the sequence of a source ncRNA interactor. It has been trained from scratch using the ncRNA-ncRNA interactions avaialble form the RNA-KG repository.
+A full transformer with multiple encoder decoder modules able to generatively predict a target non-coding RNA (ncRNA) interactor having as input only the sequence of a source ncRNA interactor. It has been trained from scratch using the ncRNA-ncRNA interactions available form the RNA-KG repository.
+
+---
 
 **Overview**
 This tutorial shows how to train a transformer encoder–decoder from scratch on pairs of nucleotide sequences (interacting RNA couples). We use 8 tokens: `A`, `U`, `C`, `G`, `PAD`, `EOS`, `UNK`, `BOS`. The model’s number of heads, layers and hidden size are configurable. We add standard sinusoidal positional encoding. We train and validate via the Hugging Face `Trainer` API.
