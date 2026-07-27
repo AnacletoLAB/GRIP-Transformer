@@ -104,12 +104,7 @@ EOS/STOP is monitored but does not terminate fixed-length generation.
 ### Top-k generation
 
 ```bash
-python generate_B4_only_lmax_topk2.py \
-  --model_dir ckpt/dry_run/final_model \
-  --legacy_code_dir . \
-  --dataset data/dry_run/test_filtered_no_aug_pident95_qcov90.tsv \
-  --t2_dataset rna1_to_t2_targets_train+test.tsv \
-  --output B4_only_lmax_topk2_generations.tsv
+python generate_B4_only_lmax_topk2.py 
 ```
 
 This script uses the fixed experimental settings:
