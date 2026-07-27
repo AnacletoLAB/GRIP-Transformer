@@ -17,7 +17,7 @@ training pipelines.
 
 The code is designed to investigate the following questions:
 
-
+Conditioned generation of an interacting ncRNA partner given a target ncRNA sequence.
 
 Sequence diversity alone is not interpreted as evidence of robust conditioning
 on `RNA1`.
