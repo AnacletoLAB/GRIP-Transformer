@@ -228,15 +228,6 @@ the figure.
 
 ## Main results
 
-The complete fixed-length experiments contain 697 distinct test RNA1 sequences
-and 13,574 `(RNA1, x')` comparisons.
-
-| Generation method | Distinct exact generations | Smith-Waterman mean best R | BLAST6 mean best R among hits | BLAST6 hits | BLAST6 no-hits |
-|---|---:|---:|---:|---:|---:|
-| Greedy | 187/697 (26.83%) | 0.628900 | 0.221262 | 618 | 79 |
-| Top-k=2 | 695/697 (99.71%) | 0.619680 | 0.224590 | 622 | 75 |
-| Uniform random control | not used as a diversity endpoint | 0.638543 | 0.219163 | 615 | 82 |
-
 In the paired model-versus-random comparison:
 
 - Smith-Waterman produced a mean paired difference of `-0.018864`
