@@ -171,10 +171,6 @@ python compare_B4_model_random_R_ttest.py \
   --output_prefix B4_only_lmax_topk2_model_vs_random_ttest
 ```
 
-The comparison writes detailed paired results, summary tables, a JSON summary,
-and an English text file suitable for the paper results section.
-
-
 The script verifies the required columns, missing values, the consistency of
 `Category_Couple`, and the total number of train and test pairs before producing
 the figure.
