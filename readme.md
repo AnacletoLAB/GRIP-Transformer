@@ -13,14 +13,12 @@ This repository is limited to the historical B4 1-mer model and the analyses
 used for the associated paper. It does not contain the later B6 or B7 3-mer
 training pipelines.
 
-## Scientific objectives
+## Scientific objective
 
-The code is designed to investigate the following questions:
+The objective of this work is to generate an interacting ncRNA partner conditioned on a given target ncRNA sequence.
 
-Conditioned generation of an interacting ncRNA partner given a target ncRNA sequence.
+Given an input ncRNA (`RNA1`), the model generates a candidate interacting ncRNA partner (`RNA2`).
 
-Sequence diversity alone is not interpreted as evidence of robust conditioning
-on `RNA1`.
 
 ## Main scripts
 
