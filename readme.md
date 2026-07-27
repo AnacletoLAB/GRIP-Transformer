@@ -16,31 +16,22 @@ Given an input ncRNA (`RNA1`), the model generates a candidate interacting ncRNA
 
 | Script | Description |
 |---|---|
-| `final_generation_30.py` | Generates the remaining RNA2 sequence after providing the first 30% of the true target as an oracle prefix. |
-| `final_generation_50.py` | Generates the remaining RNA2 sequence after providing the first 50% of the true target as an oracle prefix. |
-| `evaluate_B4_only_generated_against_t2.py` | Evaluates historical non-`lmax` B4 generations against all valid partners for the corresponding RNA1 using Smith-Waterman, BLAST4, and BLAST6. |
-| `generate_B4_only_lmax.py` | Performs greedy B4 1-mer generation while enforcing the exact maximum valid-partner length, `len(z) = lmax`. |
-| `generate_B4_only_lmax_topk2.py` | Performs reproducible fixed-length generation with `top_k=2`, temperature 1.0, and seed 42. |
-| `evaluate_B4_only_lmax_R_smith_waterman_blast6.py` | Evaluates each fixed-length generation against every valid partner using Smith-Waterman and BLAST6. |
-| `generate_random_lmax_control.py` | Generates reproducible uniformly random A/C/G/U sequences matched to the model-generated `lmax` for every RNA1. |
-| `compare_B4_model_random_R_ttest.py` | Performs paired model-versus-random statistical comparisons for Smith-Waterman and BLAST6 scores. |
-| `heatmap_interaction_types_nonaug_pkl.py` | Produces the RNA1-by-RNA2 interaction-category heatmap and the underlying count tables. |
-
-## GRIP-Transformer runtime
-
-The original GRIP-Transformer training and generation workflow uses the following files:
-
-| File | Role |
-|---|---|
-| `train.py` | Runs model training and validation using the Hugging Face `Seq2SeqTrainer`. |
+| `train.py` | Trains and validates the model using the Hugging Face `Seq2SeqTrainer`. |
 | `data.py` | Loads paired RNA sequences from TSV files and constructs the training and validation datasets. |
-| `model.py` | Defines the `NucTransformer` architecture and model configuration. |
-| `tokenizer.py` | Defines the RNA tokenizer and the sequence tokenization functions. |
-| `pos_encoding.py` | Implements the positional encoding used by the Transformer. |
-| `log_callback.py` | Defines the callback used to monitor sample generation during evaluation. |
+| `model.py` | Defines the `NucTransformer` architecture and configuration. |
+| `tokenizer.py` | Defines the RNA tokenizer and sequence tokenization functions. |
+| `pos_encoding.py` | Implements positional encoding. |
+| `log_callback.py` | Monitors sample generation during evaluation. |
 | `utils.py` | Provides reproducible random-seed initialization. |
-| `requirements.txt` | Lists the required Python dependencies. |
-
+| `final_generation_30.py` | Generates the remaining part of `RNA2` after receiving the first 30% of the true target as an oracle prefix. |
+| `final_generation_50.py` | Generates the remaining part of `RNA2` after receiving the first 50% of the true target as an oracle prefix. |
+| `evaluate_B4_only_generated_against_t2.py` | Evaluates B4 generations against all valid partners of the corresponding `RNA1` using Smith-Waterman, BLAST4, and BLAST6. |
+| `generate_B4_only_lmax.py` | Performs greedy B4 1-mer generation with the fixed constraint `len(z) = lmax`. |
+| `generate_B4_only_lmax_topk2.py` | Performs reproducible fixed-length generation with `top_k=2`, temperature `1.0`, and seed `42`. |
+| `evaluate_B4_only_lmax_R_smith_waterman_blast6.py` | Evaluates fixed-length generations against every valid partner using Smith-Waterman and BLAST6. |
+| `generate_random_lmax_control.py` | Generates reproducible random A/C/G/U sequences matched to the model-generated `lmax`. |
+| `compare_B4_model_random_R_ttest.py` | Performs paired model-versus-random statistical comparisons for Smith-Waterman and BLAST6 scores. |
+| `heatmap_interaction_types_nonaug_pkl.py` | Produces the RNA1-by-RNA2 interaction-category heatmap and the corresponding count tables. |
 
 ## Requirements
 
