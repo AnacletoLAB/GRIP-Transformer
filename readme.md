@@ -168,22 +168,6 @@ The script verifies the required columns, missing values, the consistency of
 `Category_Couple`, and the total number of train and test pairs before producing
 the figure.
 
-## Main results
-
-In the paired model-versus-random comparison:
-
-- Smith-Waterman produced a mean paired difference of `-0.018864`
-  (`p = 2.234e-09`), with the model scoring below the random control.
-- BLAST6, with no-hit cases encoded as `R = 0`, produced a mean paired
-  difference of `+0.007044` (`p = 0.150130`), which was not statistically
-  significant.
-
-These results show that top-k sampling largely removes exact sequence collapse,
-but the alignment metrics do not establish robust RNA1-specific generation.
-The strong Smith-Waterman score of the random control also demonstrates that
-local alignment followed by best-target selection can produce optimistic
-similarity values.
-
 ## Current code-organization note
 
 The current versions of:
