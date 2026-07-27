@@ -205,22 +205,6 @@ python compare_B4_model_random_R_ttest.py \
 The comparison writes detailed paired results, summary tables, a JSON summary,
 and an English text file suitable for the paper results section.
 
-## Interaction-category heatmap
-
-Place the two non-augmented pickle files in the repository root and run:
-
-```bash
-python heatmap_interaction_types_nonaug_pkl.py
-```
-
-The script writes:
-
-```text
-heatmap_interaction_types_nonaug_pkl.png
-heatmap_interaction_types_nonaug_pkl.pdf
-heatmap_interaction_types_nonaug_pkl_counts.tsv
-heatmap_interaction_types_nonaug_pkl_split_counts.tsv
-```
 
 The script verifies the required columns, missing values, the consistency of
 `Category_Couple`, and the total number of train and test pairs before producing
