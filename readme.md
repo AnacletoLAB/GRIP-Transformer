@@ -26,9 +26,9 @@ Given an input ncRNA (`RNA1`), the model generates a candidate interacting ncRNA
 | `compare_B4_model_random_R_ttest.py` | Performs paired model-versus-random statistical comparisons for Smith-Waterman and BLAST6 scores. |
 | `heatmap_interaction_types_nonaug_pkl.py` | Produces the RNA1-by-RNA2 interaction-category heatmap and the underlying count tables. |
 
-## B4 1-mer runtime
+## GRIP-Transformer runtime
 
-The generation scripts require the original B4 1-mer runtime:
+The generation scripts require the original GRIP-Transformer runtime:
 
 | File | Role |
 |---|---|
