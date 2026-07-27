@@ -1,8 +1,4 @@
-# GRIP-Transformer: B4 1-mer RNA Partner Generation
-
-This repository contains the generation, evaluation, and control pipelines used
-in **GRIP-Transformer** to study the historical **B4 1-mer Transformer** for RNA
-partner generation.
+# GRIP-Transformer: ncRNA Partner Generation
 
 Given a source RNA sequence, `RNA1`, the model generates a candidate interacting
 partner, `RNA2`. The task is one-to-many: the same `RNA1` may have several valid
