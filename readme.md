@@ -182,17 +182,17 @@ fully standalone B4-only release, these helpers should be moved to a neutral
 module such as `b4_alignment_utils.py`, or imported from
 `evaluate_B4_only_generated_against_t2.py`.
 
-## Reproducibility
+## Reproducibility settings
 
-- B4 tokenization: 1-mer
+- Tokenization: 1-mer
 - Vocabulary size: 7
-- Top-k sampling seed: 42
+- Generation method: top-k sampling
 - Top-k: 2
-- Sampling temperature: 1.0
-- BLAST word size: 6 for the fixed-length `R` evaluation
-- BLAST maximum HSPs per target: 1
-- BLAST no-hit cases: retained in row-level outputs and excluded from
-  hit-conditioned aggregate means
+- Temperature: 1.0
+- Random seed: 42
+- BLAST word size: 6
+- Maximum BLAST HSPs per target: 1
+- BLAST no-hit cases are retained in row-level outputs and excluded from hit-conditioned aggregate statistics.
 
 ## Citation
 
