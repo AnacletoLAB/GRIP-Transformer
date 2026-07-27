@@ -17,13 +17,7 @@ training pipelines.
 
 The code is designed to investigate the following questions:
 
-1. Does greedy generation collapse to a small number of repeated sequences?
-2. Does top-k sampling reduce exact sequence collapse?
-3. How similar is a generated sequence to its best valid partner in `T(x)`?
-4. How do model-generated sequences compare with length-matched random RNA
-   sequences?
-5. How strongly are the results affected by local alignment and best-target
-   selection?
+
 
 Sequence diversity alone is not interpreted as evidence of robust conditioning
 on `RNA1`.
