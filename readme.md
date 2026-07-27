@@ -158,18 +158,6 @@ python evaluate_B4_only_lmax_R_smith_waterman_blast6.py \
   --blast_dir tools/ncbi-blast-2.17.0+/bin
 ```
 
-For each run, the evaluator writes:
-
-```text
-<output_prefix>_details.tsv
-<output_prefix>_best.tsv
-<output_prefix>_summary.tsv
-```
-
-The details file contains one row per `(RNA1, x')` comparison. The best file
-contains one row per RNA1. BLAST6 no-hit cases remain visible in the best file
-but are excluded from the hit-conditioned mean and reported separately.
-
 ## Length-matched random control
 
 Generate one uniformly random RNA sequence with the same `lmax` as each
