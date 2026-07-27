@@ -136,7 +136,7 @@ Smith-Waterman and BLAST6.
 ### Evaluate top-k fixed-length generations
 
 ```bash
-python evaluate_B4_only_lmax_R_smith_waterman_blast6.py \
+python evaluate_B4_only_lmax_R_smith_waterman_blast6.py
 ```
 
 ## Length-matched random control
@@ -145,30 +145,19 @@ Generate one uniformly random RNA sequence with the same `lmax` as each
 model-generated sequence:
 
 ```bash
-python generate_random_lmax_control.py \
-  --source_generations B4_only_lmax_topk2_generations.tsv \
-  --t2 rna1_to_t2_targets_train+test.tsv \
-  --output B4_only_lmax_topk2_random_seed42_generations.tsv \
-  --seed 42
+python generate_random_lmax_control.py
 ```
 
 Evaluate the random sequences with exactly the same alignment pipeline:
 
 ```bash
-python evaluate_B4_only_lmax_R_smith_waterman_blast6.py \
-  --generations B4_only_lmax_topk2_random_seed42_generations.tsv \
-  --t2 rna1_to_t2_targets_train+test.tsv \
-  --output_prefix B4_only_lmax_topk2_random_seed42_T2_R \
-  --blast_dir tools/ncbi-blast-2.17.0+/bin
+python evaluate_B4_only_lmax_R_smith_waterman_blast6.py
 ```
 
 Run the paired statistical comparison:
 
 ```bash
-python compare_B4_model_random_R_ttest.py \
-  --model_best B4_only_lmax_topk2_T2_R_best.tsv \
-  --random_best B4_only_lmax_topk2_random_seed42_T2_R_best.tsv \
-  --output_prefix B4_only_lmax_topk2_model_vs_random_ttest
+python compare_B4_model_random_R_ttest.py
 ```
 
 The script verifies the required columns, missing values, the consistency of
