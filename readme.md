@@ -109,23 +109,6 @@ len(z) = lmax
 
 EOS/STOP is monitored but does not terminate fixed-length generation.
 
-### Greedy generation
-
-Run from the repository root:
-
-```bash
-python generate_B4_only_lmax.py \
-  --model_dir ckpt/dry_run/final_model \
-  --legacy_code_dir . \
-  --dataset data/dry_run/test_filtered_no_aug_pident95_qcov90.tsv \
-  --t2_dataset rna1_to_t2_targets_train+test.tsv \
-  --output B4_only_lmax_generations.tsv
-```
-
-The script prints each RNA1, its selected reference partner, the complete
-generated sequence, per-example diagnostics, progressive summaries, and a final
-summary.
-
 ### Top-k generation
 
 ```bash
