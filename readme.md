@@ -24,7 +24,6 @@ Given an input ncRNA (`RNA1`), the model generates a candidate interacting ncRNA
 
 | Script | Description |
 |---|---|
-| `final_generation_0.py` | Generates complete RNA2 sequences without providing any target prefix. |
 | `final_generation_30.py` | Generates the remaining RNA2 sequence after providing the first 30% of the true target as an oracle prefix. |
 | `final_generation_50.py` | Generates the remaining RNA2 sequence after providing the first 50% of the true target as an oracle prefix. |
 | `evaluate_B4_only_generated_against_t2.py` | Evaluates historical non-`lmax` B4 generations against all valid partners for the corresponding RNA1 using Smith-Waterman, BLAST4, and BLAST6. |
