@@ -137,7 +137,7 @@ The denominator is always the full length of the selected valid partner, not
 the local alignment length. The best target is selected independently for
 Smith-Waterman and BLAST6.
 
-### Evaluate top-k fixed-length generations
+**Evaluate fixed-length sequences generated with top-k sampling**
 
 ```bash
 python evaluate_B4_only_lmax_R_smith_waterman_blast6.py
@@ -183,19 +183,6 @@ but the alignment metrics do not establish robust RNA1-specific generation.
 The strong Smith-Waterman score of the random control also demonstrates that
 local alignment followed by best-target selection can produce optimistic
 similarity values.
-
-## Interpretation cautions
-
-- A high number of distinct sequences is not sufficient evidence of
-  conditioning on `RNA1`.
-- Smith-Waterman always returns a local optimum and can assign substantial
-  scores to random sequences.
-- BLAST6 is more selective and may return no hit.
-- Local alignment identity must not be interpreted as full-sequence identity.
-- The 30% and 50% generation conditions contain true target prefixes and are
-  oracle controls, not de novo generation.
-- The reported `R` values quantify the best local exact-match signal normalized
-  by the full selected-target length.
 
 ## Current code-organization note
 
