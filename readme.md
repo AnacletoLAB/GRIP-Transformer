@@ -5,10 +5,6 @@ partner, `RNA2`. The task is one-to-many: the same `RNA1` may have several valid
 partners. Consequently, generated sequences are evaluated against the complete
 valid partner set, denoted by `T(x)`, rather than against only one paired target.
 
-This repository is limited to the historical B4 1-mer model and the analyses
-used for the associated paper. It does not contain the later B6 or B7 3-mer
-training pipelines.
-
 ## Scientific objective
 
 The objective of this work is to generate an interacting ncRNA partner conditioned on a given target ncRNA sequence.
