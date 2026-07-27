@@ -80,8 +80,8 @@ The principal experiments expect the following files:
 |---|---|
 | `data/dry_run/test_filtered_no_aug_pident95_qcov90.tsv` | Historical B4 test set after the sequence-similarity leakage filter. It contains 697 distinct RNA1 sequences. |
 | `rna1_to_t2_targets_train+test.tsv` | Grouped map from each RNA1 to the complete set of known valid RNA2 partners used to construct `T(x)` and calculate `lmax`. |
-| `Margherita_train_df_no_augmentation_all.pkl` | Non-augmented training pairs used for the interaction-category heatmap. |
-| `Margherita_test_df_no_augmentation_all.pkl` | Non-augmented test pairs used for the interaction-category heatmap. |
+| `train_df_no_augmentation_all.pkl` | Non-augmented training pairs used for the interaction-category heatmap. |
+| `test_df_no_augmentation_all.pkl` | Non-augmented test pairs used for the interaction-category heatmap. |
 | `ckpt/dry_run/final_model/` | Historical B4 checkpoint directory containing the model configuration and weights. |
 
 Large datasets and model checkpoints are not necessarily distributed through
