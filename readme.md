@@ -4,7 +4,7 @@ GRIP-Transformer is an encoder-decoder Transformer designed to generate a candid
 
 Given a source ncRNA sequence (`RNA1`), the model generates a candidate partner sequence (`RNA2`).
 
-Because the task is one-to-many, the same `RNA1` may have several valid partners. Generated sequences are therefore evaluated against the complete set of known partners, denoted by `T(x)`, rather than against only one paired target.
+Because the task is one-to-many, the same `RNA1` may have several valid partners. In the fully unguided generation setting, each generated sequence is therefore evaluated against the complete set of known partners, denoted by `T(x)`. In the guided settings, where 30% or 50% of the target sequence is provided as a prefix, the generated sequence is evaluated against the corresponding paired target.
 
 ## Repository contents
 
