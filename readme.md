@@ -133,8 +133,6 @@ The experiments require the corresponding datasets, partner maps, and trained mo
 
 Large datasets and model checkpoints may not be included directly in the public repository. Paths can be changed through the command-line arguments supported by the scripts.
 
-Before publishing the repository, make sure that private notes, local server paths, logs, unpublished datasets, and internal project files are excluded.
-
 ## Citation
 
 If you use this code, please cite the associated paper.
