@@ -28,14 +28,18 @@ Given an input ncRNA (`RNA1`), the model generates a candidate interacting ncRNA
 
 ## GRIP-Transformer runtime
 
-The generation scripts require the original GRIP-Transformer runtime:
+The original GRIP-Transformer training and generation workflow uses the following files:
 
 | File | Role |
 |---|---|
-| `model.py` | Historical `NucTransformer` architecture. |
-| `tokenizer.py` | 1-mer tokenizer with the vocabulary `PAD`, `EOS`, `UNK`, `A`, `U`, `C`, and `G`. |
-| `pos_encoding.py` | Positional encoding used by the Transformer. |
-| `requirements.txt` | Python environment used for the original experiments. |
+| `train.py` | Runs model training and validation using the Hugging Face `Seq2SeqTrainer`. |
+| `data.py` | Loads paired RNA sequences from TSV files and constructs the training and validation datasets. |
+| `model.py` | Defines the `NucTransformer` architecture and model configuration. |
+| `tokenizer.py` | Defines the RNA tokenizer and the sequence tokenization functions. |
+| `pos_encoding.py` | Implements the positional encoding used by the Transformer. |
+| `log_callback.py` | Defines the callback used to monitor sample generation during evaluation. |
+| `utils.py` | Provides reproducible random-seed initialization. |
+| `requirements.txt` | Lists the required Python dependencies. |
 
 
 ## Requirements
