@@ -46,8 +46,6 @@ The generation scripts require the original B4 1-mer runtime:
 | `pos_encoding.py` | Positional encoding used by the Transformer. |
 | `requirements.txt` | Python environment used for the original experiments. |
 
-Do not replace the B4 tokenizer with the later 3-mer tokenizer. The historical
-B4 checkpoint expects a vocabulary size of 7 and does not use a BOS token.
 
 ## Requirements
 
