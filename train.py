@@ -1,50 +1,96 @@
 import os
+import torch
 import pandas as pd
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" # comment this line for data parallel (train on all avaiables GPUs)
-os.environ["CUDA_VISIBLE_DEVICES"] = "1" # comment this line for data parallel (train on all avaiables GPUs) #uso la seconda GPU
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"  # usa la seconda GPU
+
 from datasets import Dataset
 from datasets import load_dataset
-from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, EarlyStoppingCallback
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, EarlyStoppingCallback, TrainerCallback
+
 from data import build_datasets, load_pairs_tsv
-from tokenizer import tokenize_batch, tokenizer
+# from tokenizer import tokenizer, tokenize_batch  # usa tokenizer con BOS
+from tokenizer import tokenizer, tokenize_batch, detokenize_batch   # questo per l'ultima versione di 1-mer
+from log_callback import GenerationLoggerCallback
 from model import NucConfig, NucTransformer
 from utils import set_seed
+
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, message="`tokenizer` is deprecated")
-warnings.filterwarnings("ignore", message="mtime may not be reliable on this filesystem, falling back to numerical ordering")
+warnings.filterwarnings("ignore", message="mtime may not be reliable on this filesystem")
 
-# batch_size: è la suddivisione dei dati che non vengono processati tutti insieme
-# ma suddivisi in gruppi
+class DebugGenerazioneCallback(TrainerCallback):
+    def __init__(self, model, tokenizer, sample_batch, device):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.sample_batch = sample_batch
+        self.device = device
 
-# grad_acc_steps = gradient accumulation: simula un batch più grande 
-# accumulando il gradiente ogni 2 batch prima dell’aggiornamento.
+    def on_epoch_end(self, args, state, control, **kwargs):
+        print()
+        self.model.eval()
+        with torch.no_grad():
+            tokenized = self.tokenizer(self.sample_batch["source"], padding=True, return_tensors="pt").to(self.device)
+            input_ids = tokenized["input_ids"]
 
-# warmup_steps = 1000: Nei primi 1000 step, il learning rate cresce da 0 → 3e-5 
-# in modo lineare (o secondo lo scheduler che hai impostato: nel tuo caso, cosine)
+            def reconstruct_from_3mers(kmers):
+                tokens = kmers.strip().split()
+                if not tokens:
+                    return ""
+                seq = tokens[0]
+                for token in tokens[1:]:
+                    seq += token[-1]
+                return seq
+
+            generated_ids = self.model.generate(
+                input_ids=input_ids,
+                max_new_tokens=64,
+                min_new_tokens=12,
+                temperature=1.0,
+                top_k=10,
+            )
+            generated_seq = self.tokenizer.decode(generated_ids[0], skip_special_tokens=True)
+            # reconstructed_seq = reconstruct_from_3mers(generated_seq).replace("P", "[STOP]")
+            reconstructed_seq = generated_seq.replace(" ", "")
+
+            print("\n" + "=" * 60)
+            print(f"Epoca {int(state.epoch)} → Generazione di esempio")
+            print("." * 60)
+            print(f"Input  (seq1)         : {self.sample_batch['source'][0]}")
+            print(f"Target (seq2)         : {self.sample_batch['target'][0]}")
+            print(f"Generato (3-mer)      : {generated_seq}")
+            print(f"Ricostruito (nt)      : {reconstructed_seq}")
+            print(f"Lunghezza gen. (token): {generated_ids.shape[1]}")
+            print("=" * 60)
 
 def main(
-    train_file="data/dry_run/train_final.tsv", valid_file="data/dry_run/validation_raw.tsv",
+    # dataset train_augmented.tsv ha 75380 coppie, test_augmented.tsv ha 18848 coppie
+    # ho aumentato da 32 a 48 la batch size
+    train_file="data/dry_run/all_train_augmented.tsv", valid_file="data/dry_run/all_test_noaug.tsv",
     output_dir="ckpt/dry_run", logging_dir="ckpt/dry_run/logs",
-    learning_rate=3e-5, train_batch_size=32, eval_batch_size=32,
-    num_epochs=20, bf16=True, grad_acc_steps=2, warmup_steps=1000,
-    scheduler="cosine", early_stop=3, num_workers=8, seed=42 
-    ):
-    
+    learning_rate=3e-5, train_batch_size=48, eval_batch_size=48,
+    num_epochs=150, bf16=True, grad_acc_steps=2, warmup_steps=1000,
+    scheduler="cosine", early_stop=30, num_workers=8, seed=42 
+):
     set_seed(seed)
-    # data
+
+    # Dataset
     train_ds, valid_ds = build_datasets(train_file, valid_file)
     train_ds = train_ds.map(tokenize_batch, batched=True)
     valid_ds = valid_ds.map(tokenize_batch, batched=True)
 
-    # model & config
-    config = NucConfig(d_model=64, nhead=4, dim_feedforward=128, dropout=0.1, max_len=256) # QUI
-    model  = NucTransformer(config)
+    # Config e modello
+    config = NucConfig()
+    config.pad_token_id = tokenizer.vocab["PAD"]
+    config.eos_token_id = tokenizer.vocab["EOS"]
+    config.vocab_size = len(tokenizer.vocab)
+    print(f"VOCAB SIZE: {len(tokenizer.vocab)}")
+    print(f"VOCAB KEYS: {list(tokenizer.vocab.keys())[:10]} ...")
 
-    # training args
-    # early_stop mi dice di quanto deve andare avanti il training 
-    # dopo che il modello ha smesso di migliorare, qui early_stop = 3
-    # cioè se non migliora più per 3 epoche consecutive si ferma il training
-    # ed è il parametro early_stops = 3
+    model = NucTransformer(config)
+    model.print_model_params()
+
+    # Parametri training
     args = Seq2SeqTrainingArguments(
         output_dir=output_dir, logging_dir=logging_dir,
         per_device_train_batch_size=train_batch_size,
@@ -55,54 +101,39 @@ def main(
         eval_strategy="epoch", save_strategy="epoch",
         logging_strategy="epoch", report_to=["tensorboard"],
         dataloader_num_workers=num_workers, save_total_limit=3,
-        # save_total_limit serve per salvare al massimo 3 checkpoint
-        load_best_model_at_end=True,             # <-- load best on early stop, con il numero più piccolo di eval_loss
-        metric_for_best_model="eval_loss",       # <-- which metric to monitor
-        greater_is_better=False,                 # <-- lower loss is better
-        # overwrite_output_dir serve per ricominciare l'addestramento d'accapo. Altrimenti riparte dall'ultimo checkpoint
-        # overwrite_output_dir=True,
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_loss",
+        greater_is_better=False,
     )
-    callbacks = [EarlyStoppingCallback(early_stopping_patience=early_stop)]
 
-    # trainer
+    device = torch.device("cuda")
+
+    callbacks = [
+        EarlyStoppingCallback(early_stopping_patience=early_stop),
+        GenerationLoggerCallback(),
+        DebugGenerazioneCallback(model, tokenizer, sample_batch, device)
+    ]
+
     trainer = Seq2SeqTrainer(
         model=model, args=args,
         train_dataset=train_ds, eval_dataset=valid_ds,
         tokenizer=tokenizer, callbacks=callbacks
     )
-    # qui viene chiamata anche la funzione di loss
+
     trainer.train()
     print(trainer.evaluate())
-    # è il checkpoint che ha ottenuto il valore migliore di eval_loss, 
-    # non necessariamente l’ultimo.
-    trainer.save_model("ckpt/dry_run/final_model") 
+    print()
+    trainer.save_model("ckpt/dry_run/final_model")
 
-    # --------------------------------------------------------------------------------------------------------
-    
-    # confronto tra due versioni pulite del validation set (final e filtered)
-    print()
-    name = "no_match_validation.tsv"
-    filename = "data/dry_run/"+name
-    df_final = pd.read_csv(filename, sep="\t")
-    basename = os.path.basename(filename)
-    print(f"Validazione finale su {basename}")
-    final_ds = Dataset.from_pandas(df_final).map(tokenize_batch, batched=True)
-    final_metrics = trainer.evaluate(eval_dataset=final_ds)
-    print()
-    print(f"Risultati validazione finale su {name}:", final_metrics)
-    print()
+    for name in ["no_match_validation.tsv", "validation_final.tsv", "no_match_test.csv", "test_augmented.tsv"]:
+        filename = os.path.join("data/dry_run", name)
+        sep = "\t" if filename.endswith(".tsv") else ";"
+        df_final = pd.read_csv(filename, sep=sep)
+        print(f"Validazione finale su {name}")
+        final_ds = Dataset.from_pandas(df_final).map(tokenize_batch, batched=True)
+        final_metrics = trainer.evaluate(eval_dataset=final_ds)
+        print(f"Risultati validazione finale su {name}:", final_metrics)
+        print()
 
-    name = "validation_final.tsv"
-    filename = "data/dry_run/"+name
-    df_final = pd.read_csv(filename, sep="\t")
-    basename = os.path.basename(filename)
-    print(f"Validazione finale su {basename}")
-    final_ds = Dataset.from_pandas(df_final).map(tokenize_batch, batched=True)
-    final_metrics = trainer.evaluate(eval_dataset=final_ds)
-    print()
-    print(f"Risultati validazione finale su {name}:", final_metrics)
-    print()
-
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-
