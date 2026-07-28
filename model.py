@@ -3,7 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import PreTrainedModel, PretrainedConfig
 from pos_encoding import PositionalEncoding
-from tokenizer import tokenizer
+# from tokenizer import tokenizer             usato in 3-mer senza overlapping
+from tokenizer import tokenizer, tokenize_batch, detokenize_batch     # usato nell'ultima versione di 1-mer
 
 
 class NucConfig(PretrainedConfig):
@@ -36,7 +37,6 @@ class NucConfig(PretrainedConfig):
         self.pad_token_id = 0
         self.eos_token_id = 1
         self.unk_token_id = 2
-        self.bos_token_id = 7
 
 
 class NucTransformer(PreTrainedModel):
@@ -61,41 +61,21 @@ class NucTransformer(PreTrainedModel):
 
     def forward(self, input_ids, decoder_input_ids=None, attention_mask=None, labels=None):
         """Forward pass del modello"""
+        src = self.pos_enc(self.embed_src(input_ids))
+        
         if decoder_input_ids is None:
             raise ValueError("decoder_input_ids must be provided for the decoder input.")
-
-        pad_id = self.config.pad_token_id
-
-        src = self.pos_enc(self.embed_src(input_ids))
+        
         tgt = self.pos_enc(self.embed_tgt(decoder_input_ids))
-
-        # --- Padding mask: True dove c'e' PAD (posizioni da IGNORARE nell'attenzione) ---
-        # Senza queste maschere il decoder fa cross-attention sui ~1024 token (quasi tutti
-        # PAD) e il segnale della sorgente RNA1 viene annegato -> mode collapse.
-        if attention_mask is not None:
-            src_key_padding_mask = (attention_mask == 0)
-        else:
-            src_key_padding_mask = (input_ids == pad_id)
-        tgt_key_padding_mask = (decoder_input_ids == pad_id)
-
-        # Encoder (ignora il padding della sorgente)
-        memory = self.transformer.encoder(src, src_key_padding_mask=src_key_padding_mask)
-
-        # Decoder: causal mask + padding del target + padding della memory (cross-attention)
-        # Causal mask BOOLEANA (True = posizione futura da mascherare), stesso tipo delle
-        # key_padding_mask (anch'esse bool): evita il warning "mismatched ... mask" e
-        # riattiva il kernel di attenzione efficiente (niente materializzazione della
-        # matrice seq x seq -> piu' veloce e meno memoria).
-        tgt_mask = torch.triu(
-            torch.ones(tgt.size(1), tgt.size(1), device=src.device, dtype=torch.bool),
-            diagonal=1,
-        )
-        dec = self.transformer.decoder(
-            tgt, memory,
-            tgt_mask=tgt_mask,
-            tgt_key_padding_mask=tgt_key_padding_mask,
-            memory_key_padding_mask=src_key_padding_mask,
-        )
+        
+        # Encoder
+        memory = self.transformer.encoder(src)
+        
+        # Decoder con causal mask
+        tgt_mask = self.transformer.generate_square_subsequent_mask(
+            tgt.size(1)
+        ).to(src.device)
+        dec = self.transformer.decoder(tgt, memory, tgt_mask=tgt_mask)
         
         # Proiezione al vocabolario
         logits = self.out(dec)
@@ -159,7 +139,22 @@ class NucTransformer(PreTrainedModel):
         probs_filtered = probs_filtered / probs_filtered.sum(dim=-1, keepdim=True)
         
         return probs_filtered
-
+        """
+        Generazione autoregressiva di sequenze di nucleotidi.
+        
+        Args:
+            input_ids: Tensor di input (batch_size, seq_len)
+            attention_mask: Maschera di attenzione opzionale
+            max_new_tokens: Massimo numero di nuovi token da generare
+            min_new_tokens: Minimo numero di token prima di permettere EOS
+            temperature: Temperatura per il sampling (default: 1.0)
+            top_p: Soglia per nucleus sampling (default: 1.0, disabilitato)
+            top_k: Numero di top token per il sampling (default: 30)
+            verbose: Se True, stampa informazioni di debug
+        
+        Returns:
+            Tensor con i token generati (batch_size, generated_length)
+        """
     @torch.no_grad()
     def generate(
         self,
@@ -176,22 +171,7 @@ class NucTransformer(PreTrainedModel):
         max_length=None,
         min_length=None,
         verbose=False
-    ):
-        """Generazione autoregressiva di sequenze di nucleotidi.
-
-        Args:
-            input_ids: tensor di input (batch_size, seq_len)
-            attention_mask: maschera di attenzione opzionale
-            max_new_tokens: massimo numero di nuovi token da generare
-            min_new_tokens: minimo numero di token prima di permettere EOS
-            temperature: temperatura per il sampling (default: 1.0)
-            top_p: soglia per nucleus sampling (default: 1.0, disabilitato)
-            top_k: numero di top token per il sampling (default: 1)
-            verbose: se True, stampa informazioni di debug
-
-        Returns:
-            Tensor con i token generati (batch_size, generated_length)
-        """
+    ):       
         self.eval()
         device = input_ids.device
         batch_size = input_ids.size(0)
@@ -206,7 +186,6 @@ class NucTransformer(PreTrainedModel):
         
         # Recupera token speciali
         pad_id, eos_id, unk_id = self._get_special_token_ids()
-        bos_id = int(getattr(self.config, "bos_token_id", pad_id))
         
         # Gestione parametri legacy
         if target_length is not None:
@@ -223,6 +202,7 @@ class NucTransformer(PreTrainedModel):
             max_length = None
 
         max_new_tokens = max(1, int(max_new_tokens))
+        # print(f"[DEBUG generate()] max_new_tokens effettivo = {max_new_tokens}")
         min_new_tokens = max(0, int(min_new_tokens))
         
         if verbose:
@@ -231,14 +211,8 @@ class NucTransformer(PreTrainedModel):
                   f"top_k={top_k}, top_p={top_p}")
         
         # *** OTTIMIZZAZIONE: Calcola l'encoder UNA SOLA VOLTA ***
-        # Padding mask della sorgente: indispensabile per condizionare sull'RNA1
-        # (coerente con il forward di training).
-        if attention_mask is not None:
-            src_key_padding_mask = (attention_mask == 0)
-        else:
-            src_key_padding_mask = (input_ids == pad_id)
         src = self.pos_enc(self.embed_src(input_ids))
-        memory = self.transformer.encoder(src, src_key_padding_mask=src_key_padding_mask)
+        memory = self.transformer.encoder(src)
         
         # --- Inizializzazione del decoder ---
         if decoder_input_ids is not None:
@@ -247,16 +221,17 @@ class NucTransformer(PreTrainedModel):
             if verbose:
                 print(f"Prompt iniziale fornito: {generated.shape[1]} token")
         else:
-            # Comportamento standard: inizia con BOS (coerente col training)
+            # Comportamento standard: inizia con PAD
             generated = torch.full(
                 (batch_size, 1),
-                bos_id,
+                pad_id,
                 device=device,
                 dtype=torch.long
             )
         finished = torch.zeros(batch_size, dtype=torch.bool, device=device)
         
         # Generazione autoregressiva
+        # Generazione autoregressiva — corretta
         initial_len = generated.size(1)
         target_total_len = initial_len + max_new_tokens
         
@@ -266,15 +241,10 @@ class NucTransformer(PreTrainedModel):
         
             # Decoder step
             tgt = self.pos_enc(self.embed_tgt(generated))
-            tgt_mask = torch.triu(
-                torch.ones(tgt.size(1), tgt.size(1), device=device, dtype=torch.bool),
-                diagonal=1,
-            )
-            dec = self.transformer.decoder(
-                tgt, memory,
-                tgt_mask=tgt_mask,
-                memory_key_padding_mask=src_key_padding_mask,
-            )
+            tgt_mask = self.transformer.generate_square_subsequent_mask(
+                tgt.size(1)
+            ).to(device)
+            dec = self.transformer.decoder(tgt, memory, tgt_mask=tgt_mask)
             logits = self.out(dec)[:, -1, :]
         
             # Temperatura e top-k
