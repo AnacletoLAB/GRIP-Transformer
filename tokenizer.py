@@ -5,7 +5,7 @@ class NucTokenizer(PreTrainedTokenizer):
     Tokenizer minimale per RNA con tokenizzazione 1-mer e simboli speciali.
     """
     def __init__(self):
-        vocab = ["PAD", "EOS", "UNK", "A", "U", "C", "G", "BOS"]
+        vocab = ["PAD", "EOS", "UNK", "A", "U", "C", "G"]
         self.vocab = {tok: i for i, tok in enumerate(vocab)}
         self.id_to_token = {i: tok for tok, i in self.vocab.items()}
 
@@ -13,11 +13,9 @@ class NucTokenizer(PreTrainedTokenizer):
             pad_token="PAD",
             eos_token="EOS",
             unk_token="UNK",
-            bos_token="BOS",
             pad_token_id=self.vocab["PAD"],
             eos_token_id=self.vocab["EOS"],
             unk_token_id=self.vocab["UNK"],
-            bos_token_id=self.vocab["BOS"],
         )
 
     @property
@@ -32,10 +30,10 @@ class NucTokenizer(PreTrainedTokenizer):
         return list(text)
 
     def _convert_token_to_id(self, token: str):
-        return self.vocab.get(token, self.vocab["UNK"])
+        return self.vocab.get(token, self.vocab["EOS"])
 
     def _convert_id_to_token(self, index: int):
-        return self.id_to_token.get(index, "UNK")
+        return self.id_to_token.get(index, "EOS")
 
     def get_vocab(self):
         return dict(self.vocab)
@@ -50,7 +48,7 @@ class NucTokenizer(PreTrainedTokenizer):
 # === Funzioni di supporto ===
 tokenizer = NucTokenizer()
 
-def tokenize_batch(batch, max_length=1024):
+def tokenize_batch(batch):
     if "source" in batch and "target" in batch:
         src_key = "source"
         tgt_key = "target"
@@ -70,41 +68,19 @@ def tokenize_batch(batch, max_length=1024):
         )
 
     src_raw_texts = ["".join(x) if isinstance(x, list) else x for x in batch[src_key]]
-    tgt_raw_texts = ["".join(x) if isinstance(x, list) else x for x in batch[tgt_key]]
+    tgt_raw_texts = ["" + "".join(x) + " EOS" if isinstance(x, list) else "" + x + " EOS" for x in batch[tgt_key]]
 
-    bos_id = tokenizer.vocab["BOS"]
-    eos_id = tokenizer.vocab["EOS"]
-    unk_id = tokenizer.vocab["UNK"]
+    src_enc = tokenizer(src_raw_texts, padding="max_length", truncation=True, max_length=1024, return_tensors="pt")
+    tgt_enc = tokenizer(tgt_raw_texts, padding="max_length", truncation=True, max_length=1024, return_tensors="pt", add_special_tokens=True)
 
-    # PADDING DINAMICO: qui NON si imbottisce a lunghezza fissa. Si restituiscono
-    # sequenze a lunghezza variabile (liste di id); il padding fino alla sequenza piu'
-    # lunga del singolo batch viene fatto dal data_collator in fase di training.
-    # Gli id sono costruiti a mano (1-mer): cosi' BOS/EOS sono inseriti in modo
-    # affidabile e non ci sono spazi che diventerebbero UNK.
-    input_ids_list, attention_list, dec_list, lab_list = [], [], [], []
-    for src_text, tgt_text in zip(src_raw_texts, tgt_raw_texts):
-        src_text = str(src_text).strip()
-        tgt_text = str(tgt_text).strip()
-
-        # Source (RNA1): solo i nucleotidi, nessun token speciale.
-        src_ids = [tokenizer.vocab.get(ch, unk_id) for ch in src_text][:max_length]
-
-        # Target (RNA2): BOS + nucleotidi + EOS, cosi' il decoder impara a generare
-        # anche il PRIMO nucleotide (da BOS), coerente con generate() che parte da BOS.
-        tgt_ids = [bos_id] + [tokenizer.vocab.get(ch, unk_id) for ch in tgt_text] + [eos_id]
-        tgt_ids = tgt_ids[:max_length]
-
-        input_ids_list.append(src_ids)
-        attention_list.append([1] * len(src_ids))
-        # Teacher forcing: decoder_input = tutto tranne l'ultimo, labels = shiftato di 1.
-        dec_list.append(tgt_ids[:-1])
-        lab_list.append(tgt_ids[1:])
+    decoder_input_ids = tgt_enc["input_ids"][:, :-1]
+    labels = tgt_enc["input_ids"][:, 1:]
 
     return {
-        "input_ids": input_ids_list,
-        "attention_mask": attention_list,
-        "decoder_input_ids": dec_list,
-        "labels": lab_list,
+        "input_ids": src_enc["input_ids"],
+        "attention_mask": src_enc["attention_mask"],
+        "decoder_input_ids": decoder_input_ids,
+        "labels": labels
     }
 
 
