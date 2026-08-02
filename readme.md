@@ -114,9 +114,9 @@ python evaluate_B4_only_lmax_R_smith_waterman_blast6.py
 ```
 Additional evaluation scripts:
 
-- evaluate_teacher_forcing_by_interaction_type.py: teacher-forcing metrics by interaction type.
-- summarize_B4_lmax_R_by_interaction_type.py: free-generation metrics by interaction type.
-
+- `evaluate_teacher_forcing_by_interaction_type.py`: teacher-forcing metrics by interaction type.
+- `summarize_B4_lmax_R_by_interaction_type.py`: free-generation metrics by interaction type.
+  
 ## Random baseline
 
 A reproducible random baseline can be generated using RNA sequences composed of `A`, `C`, `G`, and `U`, matched to the same `lmax` used for the model-generated sequences.
