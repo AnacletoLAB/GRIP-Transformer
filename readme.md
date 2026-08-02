@@ -28,7 +28,9 @@ The repository also includes scripts for:
 - Smith-Waterman and BLAST6 evaluation;
 - comparison with a length-matched random baseline;
 - paired statistical testing;
-- interaction-category heatmap generation.
+- interaction-category heatmap generation;
+- teacher-forcing metrics by interaction type;
+- free-generation metrics by interaction type.
 
 ## Requirements
 
@@ -110,6 +112,10 @@ Run:
 ```bash
 python evaluate_B4_only_lmax_R_smith_waterman_blast6.py
 ```
+Additional evaluation scripts:
+
+- evaluate_teacher_forcing_by_interaction_type.py: teacher-forcing metrics by interaction type.
+- summarize_B4_lmax_R_by_interaction_type.py: free-generation metrics by interaction type.
 
 ## Random baseline
 
