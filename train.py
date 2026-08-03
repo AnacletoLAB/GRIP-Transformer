@@ -111,7 +111,6 @@ def main(
     callbacks = [
         EarlyStoppingCallback(early_stopping_patience=early_stop),
         GenerationLoggerCallback(),
-        DebugGenerazioneCallback(model, tokenizer, sample_batch, device)
     ]
 
     trainer = Seq2SeqTrainer(
