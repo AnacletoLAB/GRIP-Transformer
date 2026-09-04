@@ -13,6 +13,7 @@ The main model components are:
 | File | Description |
 |---|---|
 | `train_large_model.py` | Training and validation of the large GRIP-Transformer model on ncRNA–ncRNA interactions. |
+| `train_small_model.py` | Training script using the non-augmented ncRNA–ncRNA dataset (`all_train_noaug.tsv`) included in the repository. |
 | `data.py` | Dataset loading and preprocessing. |
 | `model.py` | Transformer architecture and configuration. |
 | `tokenizer.py` | RNA tokenization. |
