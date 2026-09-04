@@ -124,15 +124,5 @@ def main(
     print()
     trainer.save_model("ckpt/dry_run/final_model")
 
-    for name in ["no_match_validation.tsv", "validation_final.tsv", "no_match_test.csv", "test_augmented.tsv"]:
-        filename = os.path.join("data/dry_run", name)
-        sep = "\t" if filename.endswith(".tsv") else ";"
-        df_final = pd.read_csv(filename, sep=sep)
-        print(f"Validazione finale su {name}")
-        final_ds = Dataset.from_pandas(df_final).map(tokenize_batch, batched=True)
-        final_metrics = trainer.evaluate(eval_dataset=final_ds)
-        print(f"Risultati validazione finale su {name}:", final_metrics)
-        print()
-
 if __name__ == "__main__":
     main()
