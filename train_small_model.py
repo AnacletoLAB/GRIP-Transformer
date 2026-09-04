@@ -2,15 +2,14 @@ import os
 import torch
 import pandas as pd
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"  # usa la seconda GPU
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 from datasets import Dataset
 from datasets import load_dataset
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, EarlyStoppingCallback, TrainerCallback
 
 from data import build_datasets, load_pairs_tsv
-# from tokenizer import tokenizer, tokenize_batch  # usa tokenizer con BOS
-from tokenizer import tokenizer, tokenize_batch, detokenize_batch   # questo per l'ultima versione di 1-mer
+from tokenizer import tokenizer, tokenize_batch, detokenize_batch   
 from log_callback import GenerationLoggerCallback
 from model import NucConfig, NucTransformer
 from utils import set_seed
@@ -50,7 +49,6 @@ class DebugGenerazioneCallback(TrainerCallback):
                 top_k=10,
             )
             generated_seq = self.tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-            # reconstructed_seq = reconstruct_from_3mers(generated_seq).replace("P", "[STOP]")
             reconstructed_seq = generated_seq.replace(" ", "")
 
             print("\n" + "=" * 60)
@@ -64,8 +62,6 @@ class DebugGenerazioneCallback(TrainerCallback):
             print("=" * 60)
 
 def main(
-    # dataset train_augmented.tsv ha 75380 coppie, test_augmented.tsv ha 18848 coppie
-    # ho aumentato da 32 a 48 la batch size
     train_file="data/dry_run/all_train_noaug.tsv", valid_file="data/dry_run/all_test_noaug.tsv",
     output_dir="ckpt/dry_run", logging_dir="ckpt/dry_run/logs",
     learning_rate=3e-5, train_batch_size=48, eval_batch_size=48,
