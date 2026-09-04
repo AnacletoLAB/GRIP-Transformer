@@ -135,9 +135,14 @@ python compare_B4_model_random_R_ttest.py
 
 ## Data and model files
 
-The experiments require the corresponding datasets, partner maps, and trained model checkpoints.
+The ncRNA–ncRNA training experiments use the augmented training dataset `all_train_aug.tsv`. Because of its size, this file is not included directly in the GitHub repository and is available on Zenodo:
 
-Large datasets and model checkpoints may not be included directly in the public repository. Paths can be changed through the command-line arguments supported by the scripts.
+**GRIP-Transformer ncRNA–ncRNA augmented training dataset**  
+https://doi.org/10.5281/zenodo.22300231
+
+The corresponding non-augmented training dataset, `all_train_noaug.tsv`, is included in this repository.
+
+To run the ncRNA–ncRNA training script with the same augmented dataset used in the reported experiments, download `all_train_aug.tsv` from Zenodo and place it in the path expected by the training script.
 
 ## Citation
 
