@@ -1,20 +1,17 @@
-import os
-import torch
-import pandas as pd
+import warnings
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-from datasets import Dataset
-from datasets import load_dataset
+# from datasets import Dataset
+# from datasets import load_dataset
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, EarlyStoppingCallback
 
-from data import build_datasets, load_pairs_tsv
-from tokenizer import tokenizer, tokenize_batch, detokenize_batch   
+from data import build_datasets
+from tokenizer import tokenizer, tokenize_batch
 from log_callback import GenerationLoggerCallback
 from model import NucConfig, NucTransformer
 from utils import set_seed
 
-import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, message="`tokenizer` is deprecated")
 warnings.filterwarnings("ignore", message="mtime may not be reliable on this filesystem")
 
@@ -58,8 +55,6 @@ def main(
         metric_for_best_model="eval_loss",
         greater_is_better=False,
     )
-
-    device = torch.device("cuda")
 
     callbacks = [
         EarlyStoppingCallback(early_stopping_patience=early_stop),
