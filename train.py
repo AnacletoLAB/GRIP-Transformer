@@ -66,7 +66,7 @@ class DebugGenerazioneCallback(TrainerCallback):
 def main(
     # dataset train_augmented.tsv ha 75380 coppie, test_augmented.tsv ha 18848 coppie
     # ho aumentato da 32 a 48 la batch size
-    train_file="data/dry_run/all_train_augmented.tsv", valid_file="data/dry_run/all_test_noaug.tsv",
+    train_file="data/dry_run/all_train_aug.tsv", valid_file="data/dry_run/all_test_noaug.tsv",
     output_dir="ckpt/dry_run", logging_dir="ckpt/dry_run/logs",
     learning_rate=3e-5, train_batch_size=48, eval_batch_size=48,
     num_epochs=150, bf16=True, grad_acc_steps=2, warmup_steps=1000,
