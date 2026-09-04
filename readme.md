@@ -12,7 +12,7 @@ The main model components are:
 
 | File | Description |
 |---|---|
-| `train.py` | Model training and validation. |
+| `train_large_model.py` | Training and validation of the large GRIP-Transformer model on ncRNA–ncRNA interactions. |
 | `data.py` | Dataset loading and preprocessing. |
 | `model.py` | Transformer architecture and configuration. |
 | `tokenizer.py` | RNA tokenization. |
@@ -142,7 +142,7 @@ https://doi.org/10.5281/zenodo.22300231
 
 The corresponding non-augmented training dataset, `all_train_noaug.tsv`, is included in this repository.
 
-To run the ncRNA–ncRNA training script with the same augmented dataset used in the reported experiments, download `all_train_aug.tsv` from Zenodo and place it in the path expected by the training script.
+To run `train_large_model.py` with the same augmented dataset used in the reported experiments, download `all_train_aug.tsv` from Zenodo and place it in the path expected by the training script.
 
 ## Citation
 
