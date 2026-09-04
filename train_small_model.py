@@ -6,7 +6,7 @@ import pandas as pd
 
 from datasets import Dataset
 from datasets import load_dataset
-from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, EarlyStoppingCallback, TrainerCallback
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, EarlyStoppingCallback
 
 from data import build_datasets, load_pairs_tsv
 from tokenizer import tokenizer, tokenize_batch, detokenize_batch   
@@ -17,49 +17,6 @@ from utils import set_seed
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, message="`tokenizer` is deprecated")
 warnings.filterwarnings("ignore", message="mtime may not be reliable on this filesystem")
-
-class DebugGenerazioneCallback(TrainerCallback):
-    def __init__(self, model, tokenizer, sample_batch, device):
-        self.model = model
-        self.tokenizer = tokenizer
-        self.sample_batch = sample_batch
-        self.device = device
-
-    def on_epoch_end(self, args, state, control, **kwargs):
-        print()
-        self.model.eval()
-        with torch.no_grad():
-            tokenized = self.tokenizer(self.sample_batch["source"], padding=True, return_tensors="pt").to(self.device)
-            input_ids = tokenized["input_ids"]
-
-            def reconstruct_from_3mers(kmers):
-                tokens = kmers.strip().split()
-                if not tokens:
-                    return ""
-                seq = tokens[0]
-                for token in tokens[1:]:
-                    seq += token[-1]
-                return seq
-
-            generated_ids = self.model.generate(
-                input_ids=input_ids,
-                max_new_tokens=64,
-                min_new_tokens=12,
-                temperature=1.0,
-                top_k=10,
-            )
-            generated_seq = self.tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-            reconstructed_seq = generated_seq.replace(" ", "")
-
-            print("\n" + "=" * 60)
-            print(f"Epoca {int(state.epoch)} → Generazione di esempio")
-            print("." * 60)
-            print(f"Input  (seq1)         : {self.sample_batch['source'][0]}")
-            print(f"Target (seq2)         : {self.sample_batch['target'][0]}")
-            print(f"Generato (3-mer)      : {generated_seq}")
-            print(f"Ricostruito (nt)      : {reconstructed_seq}")
-            print(f"Lunghezza gen. (token): {generated_ids.shape[1]}")
-            print("=" * 60)
 
 def main(
     train_file="data/dry_run/all_train_noaug.tsv", valid_file="data/dry_run/all_test_noaug.tsv",
