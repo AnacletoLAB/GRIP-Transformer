@@ -15,11 +15,15 @@ The main model components are:
 | `train_large_model.py` | Training and validation of the large GRIP-Transformer model on ncRNA–ncRNA interactions. |
 | `train_small_model.py` | Training script using the non-augmented ncRNA–ncRNA dataset (`all_train_noaug.tsv`) included in the repository. |
 | `data.py` | Dataset loading and preprocessing. |
-| `model.py` | Transformer architecture and configuration. |
+| `model.py` | GRIP transformer architecture and configuration. |
 | `tokenizer.py` | RNA tokenization. |
 | `pos_encoding.py` | Positional encoding. |
 | `log_callback.py` | Generation monitoring during evaluation. |
 | `utils.py` | Reproducibility utilities. |
+
+Model.py includes the Python classes of the GRIP encoder-decoder model.
+Train_large_model.py is a python script to train a "large" GRIP model with 12 encoder and 12 decoder layers (about 357M parameters) using the full available set of ncRNA-ncRNA interactions obtained from the RNA-KG database (Cavelleri et al, Scientific Data, Nature Publishing, 11, 906, 2024). Note that before running  this script you need to download the data sets form Zenodo (https://...). 
+Train_small_model.py is a script to train a smaller model only on the miRNA-miRNA interactions collected in the file all_train_noaug.tsv avaialble in this github directory.
 
 The repository also includes scripts for:
 
