@@ -22,8 +22,9 @@ The main model components are:
 | `utils.py` | Reproducibility utilities. |
 
 Model.py includes the Python classes of the GRIP encoder-decoder model.
-Train_large_model.py is a python script to train a "large" GRIP model with 12 encoder and 12 decoder layers (about 357M parameters) using the full available set of ncRNA-ncRNA interactions obtained from the RNA-KG database (Cavelleri et al, Scientific Data, Nature Publishing, 11, 906, 2024). Note that before running  this script you need to download the data sets form Zenodo (https://...). 
-Train_small_model.py is a script to train a smaller model only on the miRNA-miRNA interactions collected in the file all_train_noaug.tsv avaialble in this github directory.
+Train_large_model.py is a python script to train a "large" *GRIP* model with 12 encoder and 12 decoder layers (about 353M parameters) using the full available set of ncRNA-ncRNA interactions obtained from the RNA-KG database (Cavelleri et al, Scientific Data, Nature Publishing, 11, 906, 2024). Note that before running  this script you need to download the data sets from Zenodo (https://...) and then put the files into the directory data/dry_run.
+Train_small_model.py is a script to train the same  model only on the miRNA-miRNA interactions collected in the file all_train_noaug.tsv avaialble in this github directory.
+These scripts are two examples about how to train and test the *GRIP* model and by using the class NucConfig you can change the *GRIP* architecture (e.g. the number of encoder and decoder layers, as well as the embedding dimension and other hyperparameters) and train and test the model on user-defined training and test sets.
 
 The repository also includes scripts for:
 
